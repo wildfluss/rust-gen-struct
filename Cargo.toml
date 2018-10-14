@@ -1,0 +1,6 @@
+[package]
+name = "rust-gen-struct"
+version = "0.1.0"
+authors = ["Yakov Zaytsev <me@yakovzaytsev.com>"]
+
+[dependencies]
