@@ -56,7 +56,7 @@ fn main() -> std::io::Result<()> {
 
 fn print_struct(name: String, type_: Type, struct_: Entity) {
     println!("#[repr(C)]");
-    println!("struct {} {{", name);
+    println!("pub struct {} {{", name);
     // match type_.get_sizeof() {
     //     Ok(size) => println!(" (size: {} bytes)", size),
     //     Err(error) => println!(" get_sizeof: {:?}", error),
@@ -65,7 +65,7 @@ fn print_struct(name: String, type_: Type, struct_: Entity) {
     for field in struct_.get_children() {
         match field.get_name() {
             Some(name) => {
-                print!("    {}", name);
+                print!("    {}", if name == "type" { "type_".to_string() } else { name });
                 let rs_type = match field.get_type() {
                     Some(type_) =>
                         match type_.get_kind() {
