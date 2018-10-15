@@ -1,6 +1,7 @@
 extern crate clang;
 
 use clang::*;
+use std::os::raw::{c_ushort, c_uint, c_uchar, c_int, c_void};
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
@@ -33,6 +34,8 @@ fn main() -> std::io::Result<()> {
         .filter(|e| e.get_kind() == EntityKind::StructDecl)
         .collect::<Vec<_>>();
 
+    println!("use std::os::raw::{{c_ushort, c_uint, c_uchar, c_int, c_void}};");
+
     // Print information about the structs
     for struct_ in structs {
         let type_ = struct_.get_type().unwrap_or_else(|| {
@@ -52,26 +55,38 @@ fn main() -> std::io::Result<()> {
 }
 
 fn print_struct(name: String, type_: Type, struct_: Entity) {
-    print!("struct: {:?}", name);
-    match type_.get_sizeof() {
-        Ok(size) => println!(" (size: {} bytes)", size),
-        Err(error) => println!(" get_sizeof: {:?}", error),
-    };
+    println!("#[repr(C)]");
+    println!("struct {} {{", name);
+    // match type_.get_sizeof() {
+    //     Ok(size) => println!(" (size: {} bytes)", size),
+    //     Err(error) => println!(" get_sizeof: {:?}", error),
+    // };
 
     for field in struct_.get_children() {
         match field.get_name() {
             Some(name) => {
-                print!("    field: {:?}", name);
-                match field.get_type() {
-                    Some(type_) => print!(" type: {:?}", type_),
-                    None => print!(" type: None")
-                }
-                match type_.get_offsetof(&name) {
-                    Ok(offset) => println!(" (offset: {} bits)", offset),
-                    Err(error) => println!(" get_offsetof: {:?}", error),
-                }
+                print!("    {}", name);
+                let rs_type = match field.get_type() {
+                    Some(type_) =>
+                        match type_.get_kind() {
+                            // XXX
+                            clang::TypeKind::UShort => "c_ushort".to_string(),
+                            clang::TypeKind::UInt => "c_uint".to_string(),
+                            clang::TypeKind::UChar => "c_uchar".to_string(),
+                            clang::TypeKind::Int => "c_int".to_string(),
+                            clang::TypeKind::Pointer => "*mut c_void".to_string(),
+                            _ => format!("{:?}", type_),
+                        },
+                    None => "None".to_string()
+                };
+                println!(": {},", rs_type);
+                // match type_.get_offsetof(&name) {
+                //     Ok(offset) => println!(" (offset: {} bits)", offset),
+                //     Err(error) => println!(" get_offsetof: {:?}", error),
+                // }
             }
-            None => println!("    field.get_name: None"),
+            None => println!("    None"),
         };
     }
+    println!("}}");
 }
