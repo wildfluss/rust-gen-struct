@@ -16,3 +16,9 @@ and build
 cd rust-gen-struct
 cargo build
 ```
+
+Try parse a file 
+
+```
+RUST_BACKTRACE=1 DYLD_LIBRARY_PATH=$HOME/.local/share/llvmenv/7.0.0/lib ./target/debug/rust-gen-struct /home/src/php-7.2.10/Zend/zend_modules.h _zend_module_entry
+```
