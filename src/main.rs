@@ -10,30 +10,57 @@ fn main() -> std::io::Result<()> {
     }
 
     // Acquire an instance of `Clang`
-    let clang = Clang::new().unwrap();
+    let clang = Clang::new().unwrap_or_else(|error| {
+        panic!("Clang::new: {:?}", error);
+    });
 
     // Create a new `Index`
     let index = Index::new(&clang, false, false);
 
     // Parse a source file into a translation unit
-    let tu = index.parser(&args[1]).parse().unwrap();
+    let tu = index
+        .parser(&args[1])
+        .parse()
+        .unwrap_or_else(|source_error| {
+            panic!("parse: {:?}", source_error);
+        });
 
     // Get the structs in this translation unit
-    let structs = tu.get_entity().get_children().into_iter().filter(|e| {
-        e.get_kind() == EntityKind::StructDecl
-    }).collect::<Vec<_>>();
+    let structs = tu
+        .get_entity()
+        .get_children()
+        .into_iter()
+        .filter(|e| e.get_kind() == EntityKind::StructDecl)
+        .collect::<Vec<_>>();
 
     // Print information about the structs
     for struct_ in structs {
-        let type_ =  struct_.get_type().unwrap();
-        let size = type_.get_sizeof().unwrap();
-        println!("struct: {:?} (size: {} bytes)", struct_.get_name().unwrap(), size);
+        let type_ = struct_.get_type().unwrap_or_else(|| {
+            panic!("get_type");
+        });
+        match struct_.get_name() {
+            Some(name) => {
+                print!("struct: {:?}", name);
+                match type_.get_sizeof() {
+                    Ok(size) => println!(" (size: {} bytes)", size),
+                    Err(error) => println!(" get_sizeof: {:?}", error),
+                };
 
-        for field in struct_.get_children() {
-            let name = field.get_name().unwrap();
-            let offset = type_.get_offsetof(&name).unwrap();
-            println!("    field: {:?} (offset: {} bits)", name, offset);
-        }
+                for field in struct_.get_children() {
+                    match field.get_name() {
+                        Some(name) => {
+                            print!("    field: {:?}", name);
+                            match type_.get_offsetof(&name) {
+                                Ok(offset) => println!(" (offset: {} bits)", offset),
+                                Err(error) => println!(" get_offsetof: {:?}", error),
+                            }
+                        }
+                        None => println!("    field.get_name: None"),
+                    };
+                }
+            }
+            None => print!("struct: None"),
+        };
     }
 
     Ok(())

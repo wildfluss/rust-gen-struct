@@ -22,3 +22,10 @@ Try parse a file
 ```
 RUST_BACKTRACE=1 DYLD_LIBRARY_PATH=$HOME/.local/share/llvmenv/7.0.0/lib ./target/debug/rust-gen-struct /home/src/php-7.2.10/Zend/zend_modules.h _zend_module_entry
 ```
+
+Example how to run cindex-dump.py (Anaconda3-5.2.0)
+
+```
+tar zxf cfe-7.0.0.src.tar.xz
+PYTHONPATH=/path/to/llvm-7.0.0.src/bindings/python/:/path/to/cfe-7.0.0.src/bindings/python/ DYLD_LIBRARY_PATH=$HOME/.local/share/llvmenv/7.0.0/lib python cindex-dump.py /path/to/php-7.2.10/Zend/zend_modules.h
+```
