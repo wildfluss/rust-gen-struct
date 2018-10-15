@@ -44,7 +44,7 @@ fn main() -> std::io::Result<()> {
                     print_struct(name, type_, struct_)
                 }
             }
-            None => print!("struct: None"),
+            None => (),
         };
     }
 
@@ -62,6 +62,10 @@ fn print_struct(name: String, type_: Type, struct_: Entity) {
         match field.get_name() {
             Some(name) => {
                 print!("    field: {:?}", name);
+                match field.get_type() {
+                    Some(type_) => print!(" type: {:?}", type_),
+                    None => print!(" type: None")
+                }
                 match type_.get_offsetof(&name) {
                     Ok(offset) => println!(" (offset: {} bits)", offset),
                     Err(error) => println!(" get_offsetof: {:?}", error),
