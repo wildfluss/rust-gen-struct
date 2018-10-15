@@ -40,23 +40,8 @@ fn main() -> std::io::Result<()> {
         });
         match struct_.get_name() {
             Some(name) => {
-                print!("struct: {:?}", name);
-                match type_.get_sizeof() {
-                    Ok(size) => println!(" (size: {} bytes)", size),
-                    Err(error) => println!(" get_sizeof: {:?}", error),
-                };
-
-                for field in struct_.get_children() {
-                    match field.get_name() {
-                        Some(name) => {
-                            print!("    field: {:?}", name);
-                            match type_.get_offsetof(&name) {
-                                Ok(offset) => println!(" (offset: {} bits)", offset),
-                                Err(error) => println!(" get_offsetof: {:?}", error),
-                            }
-                        }
-                        None => println!("    field.get_name: None"),
-                    };
+                if args[2] == name {
+                    print_struct(name, type_, struct_)
                 }
             }
             None => print!("struct: None"),
@@ -64,4 +49,25 @@ fn main() -> std::io::Result<()> {
     }
 
     Ok(())
+}
+
+fn print_struct(name: String, type_: Type, struct_: Entity) {
+    print!("struct: {:?}", name);
+    match type_.get_sizeof() {
+        Ok(size) => println!(" (size: {} bytes)", size),
+        Err(error) => println!(" get_sizeof: {:?}", error),
+    };
+
+    for field in struct_.get_children() {
+        match field.get_name() {
+            Some(name) => {
+                print!("    field: {:?}", name);
+                match type_.get_offsetof(&name) {
+                    Ok(offset) => println!(" (offset: {} bits)", offset),
+                    Err(error) => println!(" get_offsetof: {:?}", error),
+                }
+            }
+            None => println!("    field.get_name: None"),
+        };
+    }
 }
