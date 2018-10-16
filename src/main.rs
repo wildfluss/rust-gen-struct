@@ -34,7 +34,7 @@ fn main() -> std::io::Result<()> {
         .filter(|e| e.get_kind() == EntityKind::StructDecl)
         .collect::<Vec<_>>();
 
-    println!("use std::os::raw::{{c_ushort, c_uint, c_uchar, c_int, c_void}};");
+    println!("use std::os::raw::{{c_ushort, c_uint, c_uchar, c_int, c_void, c_char}};");
 
     // Print information about the structs
     for struct_ in structs {
@@ -74,7 +74,13 @@ fn print_struct(name: String, type_: Type, struct_: Entity) {
                             clang::TypeKind::UInt => "c_uint".to_string(),
                             clang::TypeKind::UChar => "c_uchar".to_string(),
                             clang::TypeKind::Int => "c_int".to_string(),
-                            clang::TypeKind::Pointer => "*mut c_void".to_string(),
+                            clang::TypeKind::Pointer => {
+                                if type_.get_display_name() == "const char *" {
+                                    "*const c_char".to_string()
+                                } else {
+                                    "*mut c_void".to_string()
+                                }
+                            },
                             _ => format!("{:?}", type_),
                         },
                     None => "None".to_string()
