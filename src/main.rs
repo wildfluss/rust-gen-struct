@@ -65,7 +65,7 @@ fn print_struct(name: String, type_: Type, struct_: Entity) {
     for field in struct_.get_children() {
         match field.get_name() {
             Some(name) => {
-                print!("    {}", if name == "type" { "type_".to_string() } else { name });
+                print!("    pub {}", if name == "type" { "type_".to_string() } else { name });
                 let rs_type = match field.get_type() {
                     Some(type_) =>
                         match type_.get_kind() {
